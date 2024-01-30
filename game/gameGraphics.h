@@ -32,6 +32,12 @@ FloatColor getDrawColor();
 void setDrawFade( float inA );
 
 
+// does not include global fade values (returns last value set with
+// setDrawFade or setDrawColor)
+float getDrawFade();
+
+
+
 // adds a global fade that is multiplied into the draw fade
 // multiple fades can be stacked, and they will multiply together
 // Only affects fade of subsequent calls to setDrawColor or setDrawFade
@@ -54,6 +60,17 @@ void toggleAdditiveBlend( char inAdditive );
 // turning on replaces current blending mode
 // turning off goes back to normal blending
 void toggleMultiplicativeBlend( char inMultiplicative );
+
+
+
+// defaults to non-inverted (normal) blending
+// Turning on replaces current blend mode
+// Turning off goes back to normal blending
+// inverted blend means that new source colors invert underlying destination
+// colors.  Drawing a white rectangle would invert everything under the 
+// rectangle.
+void toggleInvertedBlend( char inInverted );
+
 
 
 // distinct from additive fragment blending (above)

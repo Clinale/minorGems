@@ -130,6 +130,11 @@ void setDrawFade( float inA ) {
     }
 
 
+float getDrawFade() {
+    return lastA;
+}
+
+
 
 
 FloatColor getFloatColor( const char *inHexString ) {
@@ -175,6 +180,16 @@ void toggleMultiplicativeBlend( char inMultiplicative ) {
         setNormalBlend();
         }
     }
+
+
+void toggleInvertedBlend( char inInverted ) {
+    if( inInverted ) {
+        glBlendFunc( GL_ONE_MINUS_DST_COLOR, GL_ZERO );
+    }
+    else {
+        setNormalBlend();
+    }
+}
 
 
 

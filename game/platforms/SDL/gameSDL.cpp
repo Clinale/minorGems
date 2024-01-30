@@ -911,6 +911,25 @@ static void playSoundSpriteInternal(
     
     SoundSprite *s = (SoundSprite*)inHandle;
     
+
+    if( s->numSamples / soundSampleRate > 5 ) {
+        // a long sound, longer than 5 seconds total
+        // perhaps a bit of music or some other structured sound
+        // instead of an instant "hit" type sound
+        // Don't ever play more than one instance of a longer sound
+        // simultaneously.
+        
+        for( int i=0; i<playingSoundSprites.size(); i++ ) {
+            if( playingSoundSprites.getElement(i)->handle ==
+                s->handle ) {
+                // already playing this sound sprite
+                return;
+            }
+        }
+    }
+    
+
+
     if( ! s->noVariance ) {
         
         if( inForceVolume == -1 ) {
@@ -1456,7 +1475,7 @@ int mainFunction( int inNumArgs, char **inArgs ) {
             PROCESS_PER_MONITOR_DPI_AWARE  = 2
             } PROCESS_DPI_AWARENESS;
         
-        typedef HRESULT (*SetProcessDpiAwarenessFunc)( PROCESS_DPI_AWARENESS );
+        typedef HRESULT (WINAPI *SetProcessDpiAwarenessFunc)( PROCESS_DPI_AWARENESS );
         
         SetProcessDpiAwarenessFunc setAwareness = 
             (SetProcessDpiAwarenessFunc)GetProcAddress(
@@ -1489,7 +1508,7 @@ int mainFunction( int inNumArgs, char **inArgs ) {
         
         if( hUser32 != NULL ) {
             
-            typedef BOOL (*SetProcessDPIAwareFunc)();
+            typedef BOOL (WINAPI *SetProcessDPIAwareFunc)();
             
             SetProcessDPIAwareFunc setDPIAware = 
                 (SetProcessDPIAwareFunc)GetProcAddress( hUser32, 
@@ -1518,6 +1537,8 @@ int mainFunction( int inNumArgs, char **inArgs ) {
         }
     
     int sdlResult = SDL_Init( flags );
+    AppLog::setLog( new FileLog( "log.txt" ) );
+    AppLog::setLoggingLevel( Log::DETAIL_LEVEL );
 
 
     // do this mac check after initing SDL,
@@ -1533,19 +1554,22 @@ int mainFunction( int inNumArgs, char **inArgs ) {
         // arg 0 is the path to the app executable
         char *appDirectoryPath = stringDuplicate( inArgs[0] );
     
-        char *bundleName = autoSprintf( "%s_%d.app", 
+        char *bundleName = autoSprintf( "%s_v%d.app", 
                                         getAppName(), getAppVersion() );
 
         char *appNamePointer = strstr( appDirectoryPath, bundleName );
+        AppLog::info( appDirectoryPath );
+        AppLog::info( bundleName );
 
         if( appNamePointer != NULL ) {
             // terminate full app path to get parent directory
             appNamePointer[0] = '\0';
-            
+            AppLog::info( "chdir" );
             chdir( appDirectoryPath );
             }
-                
-        
+        AppLog::info( appDirectoryPath );
+
+
         if( ! isSettingsFolderFound() ) {
             // first, try setting dir based on preferences file
             char *prefFilePath = getPrefFilePath();
@@ -1659,8 +1683,6 @@ int mainFunction( int inNumArgs, char **inArgs ) {
 
         
 
-    AppLog::setLog( new FileLog( "log.txt" ) );
-    AppLog::setLoggingLevel( Log::DETAIL_LEVEL );
     
     AppLog::info( "New game starting up" );
     
