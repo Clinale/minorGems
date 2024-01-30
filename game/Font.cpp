@@ -96,6 +96,17 @@ size_t strlen(const unicode *u)
     return i;
 }
 
+// judge if `inString` consists of ASCII chars
+bool isASCII(unicode *inString) {
+    while (*inString) {
+        if ( *inString & 0xff80) {
+            return false;
+        }
+        inString ++;
+    }
+    return true;
+}
+
 static int unicodeWide = 22;
 static double unicodeScale = 1.4;
 static int unicodeOffset = -5;
@@ -673,7 +684,10 @@ double Font::getCharPos( SimpleVector<doublePair> *outPositions,
         y += scale * mSpriteHeight / 4;
     }
     
-
+    // align unicode char center in vertical direction
+    if (! isASCII(inString) ) {
+        y -= getFontHeight() / 2;
+    }
     
     double stringWidth = 0;
     
