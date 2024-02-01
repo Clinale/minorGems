@@ -97,7 +97,7 @@ size_t strlen(const unicode *u)
 }
 
 // judge if `inString` consists of ASCII chars
-bool isASCII(unicode *inString) {
+bool isASCII(const unicode *inString) {
     while (*inString) {
         if ( *inString & 0xff80) {
             return false;
