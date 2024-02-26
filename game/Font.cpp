@@ -97,14 +97,14 @@ size_t strlen(const unicode *u)
 }
 
 // judge if `inString` consists of ASCII chars
-bool isASCII(const unicode *inString) {
+bool hasASCII(const unicode *inString) {
     while (*inString) {
-        if ( *inString & 0xff80) {
-            return false;
+        if ( *inString < 128) {
+            return true;
         }
         inString ++;
     }
-    return true;
+    return false;
 }
 
 static int unicodeWide = 22;
@@ -193,8 +193,8 @@ xCharTexture* getTextChar(unicode ch)
   
 void init(int size)  
 {  
-    unicodeScale = SettingsManager::getFloatSetting( "unicodeScale", 1.4 );
-    unicodeWide = SettingsManager::getIntSetting( "unicodeWide", 22 );
+    unicodeScale = SettingsManager::getFloatSetting( "unicodeScale", 1.5 );
+    unicodeWide = SettingsManager::getIntSetting( "unicodeWide", 35 );
     unicodeOffset = SettingsManager::getIntSetting( "unicodeOffset", -5 );
 
     size *= unicodeScale;
@@ -685,9 +685,9 @@ double Font::getCharPos( SimpleVector<doublePair> *outPositions,
     }
     
     // align unicode char center in vertical direction
-    if (! isASCII(inString) ) {
-        y -= getFontHeight() / 2;
-    }
+    //if (! hasASCII(inString) ) {
+    //    y -= getFontHeight() / 2;
+    //}
     
     double stringWidth = 0;
     
