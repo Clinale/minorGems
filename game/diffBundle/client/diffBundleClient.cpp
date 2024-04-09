@@ -102,8 +102,6 @@ char wasUpdateWriteError() {
 
 char startUpdate( char *inUpdateServerURL, int inOldVersionNumber,
                   char inSkipUniversalBundles ) {
-    // don't auto update
-    return false;
     writeError = false;
     
     batchMirrorUpdate = false;
