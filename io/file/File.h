@@ -1051,8 +1051,8 @@ inline char *File::getAbsoluteFileName( int *outLength ) {
 inline char *File::readFileContents() {
 
     int length;
-    // text mode!
-    unsigned char *data = readFileContents( &length, true );
+    // binary mode!
+    unsigned char *data = readFileContents( &length, false );
 
     if( data == NULL ) {
         return NULL;
