@@ -8,7 +8,7 @@
 #include "minorGems/graphics/openGL/SingleTextureGL.h"
 #include <ft2build.h>
 #include <freetype/ftglyph.h>
-
+#include <wchar.h>
 
 enum TextAlignment {
     alignCenter = 0,
@@ -26,7 +26,7 @@ typedef struct KerningTable {
     } KerningTable;
 
 
-typedef unsigned short unicode;
+typedef wchar_t unicode;
 
 
 struct xCharTexture  

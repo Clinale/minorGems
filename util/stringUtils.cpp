@@ -186,6 +186,40 @@ char **split( const char *inString, const char *inSeparator,
     return returnArray;
     }
 
+unicode **split( const unicode *inString, const unicode *inSeparator, 
+              int *outNumParts ) {
+    SimpleVector<unicode *> *parts = new SimpleVector<unicode *>();
+    
+    unicode *workingString = stringDuplicate( inString );
+    unicode *workingStart = workingString;
+
+    unsigned int separatorLength = wcslen( inSeparator );
+
+    unicode *foundSeparator = wcsstr( workingString, inSeparator );
+
+    while( foundSeparator != NULL ) {
+        // terminate at separator        
+        foundSeparator[0] = '\0';
+        parts->push_back( stringDuplicate( workingString ) );
+
+        // skip separator
+        workingString = &( foundSeparator[ separatorLength ] );
+        foundSeparator = wcsstr( workingString, inSeparator );
+        }
+
+    // add the remaining part, even if it is the empty string
+    parts->push_back( stringDuplicate( workingString ) );
+
+                      
+    delete [] workingStart;
+
+    *outNumParts = parts->size();
+    char **returnArray = parts->getElementArray();
+    
+    delete parts;
+
+    return returnArray;
+    }
 
 
 char *join( char **inStrings, int inNumParts, const char *inGlue ) {
@@ -204,6 +238,76 @@ char *join( char **inStrings, int inNumParts, const char *inGlue ) {
     }
 
 
+// 函数：去掉字符串首尾的空白字符
+void trim(unicode *str) {
+    // 找到第一个非空白字符
+    unicode *start = str;
+    while (*start && isspace((unsigned char)*start)) {
+        start++;
+    }
+
+    // 如果字符串全是空白字符
+    if (*start == '\0') {
+        str[0] = '\0'; // 直接返回空字符串
+        return;
+    }
+
+    // 找到最后一个非空白字符
+    unicode *end = str + wcslen(str) - 1;
+    while (end > start && isspace((unsigned char)*end)) {
+        end--;
+    }
+
+    // 设置新的字符串结束符
+    *(end + 1) = '\0';
+
+    // 将处理后的字符串复制到原字符串中
+    memmove(str, start, (end - start + 2)*sizeof(unicode)); // +2 是为了包括 '\0' 和最后一个非空字符
+}
+
+void reverseUnicodeString(unicode *str, int start, int end) {
+    while (start < end) {
+        unicode temp = str[start];
+        str[start] = str[end];
+        str[end] = temp;
+        start++;
+        end--;
+    }
+}
+
+void rotateUnicodeString(unicode *str, int d) {
+    int len = wcslen(str);
+    
+    // 处理 d 大于 len 的情况
+    d = d % len;
+
+    // 反转整个字符串
+    reverseUnicodeString(str, 0, len - 1);
+    // 反转前 d 个字符
+    reverseUnicodeString(str, 0, d - 1);
+    // 反转后 len - d 个字符
+    reverseUnicodeString(str, d, len - 1);
+}
+
+void removeExtraNewlinesAndWhiteSpace(unicode *str) {
+    int i, j = 0;
+    trim(str); // 去掉首尾空白字符
+
+    // 遍历字符串
+    for (i = 0; str[i] != 0; i++) {
+        // 如果当前字符是换行符
+        if (str[i] == '\n') {
+            // 如果不是第一个换行符，才添加
+            if (j > 0 || str[j - 1] != '\n') {
+                str[j++] = str[i]; // 保留换行符
+            }
+        } else {
+            str[j++] = str[i]; // 保留其他字符
+        }
+    }
+    
+    str[j] = '\0'; // 添加字符串结束符
+}
 
 char *concatonate( const char *inStringA, const char *inStringB ) {
     char **tempArray = new char*[2];
@@ -215,8 +319,17 @@ char *concatonate( const char *inStringA, const char *inStringB ) {
     delete [] tempArray;
 
     return result;
-    }
-    
+}
+
+unicode *concatonate( const unicode *inStringA, const unicode *inStringB ) {
+    int lenA = wcslen(inStringA);
+    int lenB = wcslen(inStringB);
+    unicode* result = new unicode[(lenA+lenB+1)];
+    memcpy(result, inStringA, sizeof(unicode)*lenA);
+    memcpy(result+lenA, inStringB, sizeof(unicode)*lenB);
+    result[lenA+lenB+1] = 0;
+    return result;
+}
 
 
 char *replaceOnce( const char *inHaystack, const char *inTarget,

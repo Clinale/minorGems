@@ -73,6 +73,105 @@ unicode utf8ToCodepoint(const unsigned char *&p)
     return codepoint;
 }
 
+// #c---
+/*****************************************************************************
+ * 将一个字符的Unicode(UCS-2和UCS-4)编码转换成UTF-8编码.
+ *
+ * 参数:
+ *    unic     字符的Unicode编码值
+ *    pOutput  指向输出的用于存储UTF8编码值的缓冲区的指针
+ *    outsize  pOutput缓冲的大小
+ *
+ * 返回值:
+ *    返回转换后的字符的UTF8编码所占的字节数, 如果出错则返回 0 .
+ *
+ * 注意:
+ *     1. UTF8没有字节序问题, 但是Unicode有字节序要求;
+ *        字节序分为大端(Big Endian)和小端(Little Endian)两种;
+ *        在Intel处理器中采用小端法表示, 在此采用小端法表示. (低地址存低位)
+ *     2. 请保证 pOutput 缓冲区有最少有 6 字节的空间大小!
+ ****************************************************************************/
+int codepointToUTF8(unicode unic, unsigned char *&pOutput)
+{
+    // assert(pOutput != NULL);
+    // assert(outSize >= 6);
+ 
+    if ( unic <= 0x0000007F )
+    {
+        // * U-00000000 - U-0000007F:  0xxxxxxx
+        *pOutput     = (unic & 0x7F);
+        pOutput++;
+        return 1;
+    }
+    else if ( unic >= 0x00000080 && unic <= 0x000007FF )
+    {
+        // * U-00000080 - U-000007FF:  110xxxxx 10xxxxxx
+        *pOutput     = ((unic >> 6) & 0x1F) | 0xC0;
+        pOutput++;
+        *(pOutput) = (unic & 0x3F) | 0x80;
+        pOutput++;
+        return 2;
+    }
+    else if ( unic >= 0x00000800 && unic <= 0x0000FFFF )
+    {
+        // * U-00000800 - U-0000FFFF:  1110xxxx 10xxxxxx 10xxxxxx
+        *pOutput     = ((unic >> 12) & 0x0F) | 0xE0;
+        pOutput++;
+        *(pOutput) = ((unic >>  6) & 0x3F) | 0x80;
+        pOutput++;
+        *(pOutput) = (unic & 0x3F) | 0x80;
+        pOutput++;
+        return 3;
+    }
+    else if ( unic >= 0x00010000 && unic <= 0x001FFFFF )
+    {
+        // * U-00010000 - U-001FFFFF:  11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+        *pOutput     = ((unic >> 18) & 0x07) | 0xF0;
+        pOutput++;
+        *(pOutput) = ((unic >> 12) & 0x3F) | 0x80;
+        pOutput++;
+        *(pOutput) = ((unic >>  6) & 0x3F) | 0x80;
+        pOutput++;
+        *(pOutput) = (unic & 0x3F) | 0x80;
+        pOutput++;
+        return 4;
+    }
+    else if ( unic >= 0x00200000 && unic <= 0x03FFFFFF )
+    {
+        // * U-00200000 - U-03FFFFFF:  111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+        *pOutput     = ((unic >> 24) & 0x03) | 0xF8;
+        pOutput++;
+        *(pOutput) = ((unic >> 18) & 0x3F) | 0x80;
+        pOutput++;
+        *(pOutput) = ((unic >> 12) & 0x3F) | 0x80;
+        pOutput++;
+        *(pOutput) = ((unic >>  6) & 0x3F) | 0x80;
+        pOutput++;
+        *(pOutput) = (unic & 0x3F) | 0x80;
+        pOutput++;
+        return 5;
+    }
+    else if ( unic >= 0x04000000 && unic <= 0x7FFFFFFF )
+    {
+        // * U-04000000 - U-7FFFFFFF:  1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+        *pOutput     = ((unic >> 30) & 0x01) | 0xFC;
+        pOutput++;
+        *(pOutput) = ((unic >> 24) & 0x3F) | 0x80;
+        pOutput++;
+        *(pOutput) = ((unic >> 18) & 0x3F) | 0x80;
+        pOutput++;
+        *(pOutput) = ((unic >> 12) & 0x3F) | 0x80;
+        pOutput++;
+        *(pOutput) = ((unic >>  6) & 0x3F) | 0x80;
+        pOutput++;
+        *(pOutput) = (unic & 0x3F) | 0x80;
+        pOutput++;
+        return 6;
+    }
+ 
+    return 0;
+}
+
 // output should have the size of utf8String
 void utf8ToUnicode(const char *utf8String, unicode* const output)
 {
@@ -86,6 +185,19 @@ void utf8ToUnicode(const char *utf8String, unicode* const output)
     }
 
     output[len] = 0;
+}
+
+// output should have the size of utf8String
+int unicodeToUTF8(const unicode *unicString, char* utf8String)
+{
+    const unicode *p = unicString;
+    int len = 0;
+    while (*p) {
+        len += codepointToUTF8(*p, utf8String);
+        p++;
+    }
+    utf8String[len] = 0;
+    return len;
 }
 
 size_t strlen(const unicode *u)

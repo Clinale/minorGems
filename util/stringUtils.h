@@ -104,7 +104,24 @@ inline char *stringDuplicate( const char *inString ) {
     return returnBuffer;    
     }
 
+/**
+ * Duplicates a string into a newly allocated string.
+ *
+ * @param inString the \0-terminated string to duplicate.
+ *   Must be destroyed by caller if non-const.
+ *
+ * @return a \0-terminated duplicate of inString.
+ *   Must be destroyed by caller.
+ */
+inline unicode *stringDuplicate( const unicode *inString ) {
+    
+    int length = wcslen(inString);
+    char *returnBuffer = new unicode[ length + 1 ];
 
+    memcpy( returnBuffer, inString, sizeof(unicode) * (length+1));
+
+    return returnBuffer;    
+}
 
 /**
  * Converts a string to lower case.
