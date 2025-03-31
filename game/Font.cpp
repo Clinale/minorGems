@@ -635,10 +635,10 @@ void Font::drawChar(unicode c, doublePair inCenter) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);  
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);  
 
-    int w = pCharTex->mWidth; 
+    int w = pCharTex->mWidth;
     int h = pCharTex->mHeight;
-    int ch_x = inCenter.x - w / 2 + unicodeOffset;
-    int ch_y = inCenter.y - h / 2;
+    int ch_x = inCenter.x - w / 2;
+    int ch_y = inCenter.y - h / 2 + unicodeOffset; // 字体显示位置修正
     glBegin ( GL_QUADS );
     {  
         glTexCoord2f(0.0f, 1.0f); glVertex2f(ch_x, ch_y + h);  
